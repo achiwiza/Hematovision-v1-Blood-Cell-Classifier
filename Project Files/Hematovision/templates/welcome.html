@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to HematoVision</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+
+<body>
+  <div class="container">
+    <img class="logo" src="{{ url_for('static', filename='logo1.png') }}" alt="HematoVision Logo">
+    <h1>Welcome to HematoVision</h1>
+    
+<p class="typewriter">Upload a blood cell image to receive a diagnostic prediction. 
+    <p class="typewriter">Powered by AI, designed for clarity and confidence.</p>
+
+    <div class="button-box">
+      <a href="/predict" class="cta-button">Get Started</a>
+      <p class="description-text">
+        
+      </p>
+      <button onclick="toggleHelp()" class="help-toggle">Need Help?</button>
+    </div>
+
+    <div id="help-box" style="display: none;">
+      <h3>How to Use:</h3>
+      <ul>
+        <li>Click “Get Started” to visit the prediction page.</li>
+        <li>Upload a clear blood cell image (.png or .jpg).</li>
+        <li>View top-3 predictions with confidence levels.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function toggleHelp() {
+      const help = document.getElementById("help-box");
+      help.style.display = help.style.display === "none" ? "block" : "none";
+    }
+  </script>
+</body>
+</html>

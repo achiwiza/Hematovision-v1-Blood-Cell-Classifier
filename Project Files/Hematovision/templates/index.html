@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HematoVision - Blood Cell Classifier</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/predict.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Floating blood cells -->
+  <div class="blood-cell"></div>
+  <div class="blood-cell"></div>
+  <div class="blood-cell"></div>
+  <div class="blood-cell"></div>
+  <div class="blood-cell"></div>
+
+  <div class="container">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="HematoVision Logo" />
+    <h1>HematoVision</h1>
+    <p>Upload a blood cell image to classify</p>
+
+    <!-- 🟡 Flash warning for low-confidence -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-box">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data">
+      <input type="file" name="file" accept="image/*" required><br>
+      <button type="submit">Classify</button>
+    </form>
+
+    <!-- ⏳ Spinner -->
+    <div id="spinner" style="display: none;">
+      <img src="{{ url_for('static', filename='spinner.gif') }}" width="40" alt="Loading..." />
+      <p>Analyzing image...</p>
+    </div>
+
+    <!-- 🖼️ Uploaded image -->
+    {% if filename %}
+  <h3>📸 Uploaded Image:</h3>
+  <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="250">
+{% endif %}
+
+
+    <!-- 🔁 Toggle Button -->
+    {% if prediction %}
+      <button id="toggle-btn" data-raw="false">🔁 Toggle Raw/Confidence</button>
+    {% endif %}
+{% if prediction %}
+  <h3>🔍 Top Prediction: <span style="color:green;">{{ prediction[0][0].capitalize() }}</span></h3>
+{% endif %}
+
+    <!-- 📊 Prediction Results -->
+    {% if prediction %}
+      <div class="results">
+        {% for label, confidence in prediction %}
+          <div class="label">{{ label.capitalize() }} ({{ '%.2f' | format(confidence * 100) }}%)</div>
+          <div class="bar-container">
+            <div class="bar" style="width: {{ confidence * 100 }}%;">{{ '%.0f' | format(confidence * 100) }}%</div>
+          </div>
+        {% endfor %}
+      </div>
+
+{% if prediction[0][1] < 0.15 %}
+  <p style="color:#a00;"><em>⚠️ Low confidence — consider re-uploading for clearer results.</em></p>
+{% endif %}
+
+<a href="/predict" style="margin-top: 15px; display: inline-block; margin-right: 10px;">
+  <button style="background-color: #d32f2f; color: white; padding: 6px 14px; font-size: 0.9em; border: none; border-radius: 6px; cursor: pointer;">
+    🔄 Classify Another Image
+  </button>
+</a>
+      <form method="POST" action="/download-report">
+        <input type="hidden" name="filename" value="{{ filename }}">
+        <button type="submit">📥 Download PDF Report</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <!-- ⚙️ JavaScript -->
+  <script>
+    const form = document.querySelector("form");
+    const spinner = document.getElementById("spinner");
+    const toggleBtn = document.getElementById("toggle-btn");
+    const bars = document.querySelectorAll(".bar");
+
+    form?.addEventListener("submit", () => {
+      spinner.style.display = "block";
+    });
+
+    toggleBtn?.addEventListener("click", () => {
+      let isRaw = toggleBtn.dataset.raw === "true";
+      toggleBtn.dataset.raw = (!isRaw).toString();
+      bars.forEach(bar => {
+        const percent = parseFloat(bar.style.width);
+        bar.textContent = !isRaw ? (percent / 100).toFixed(2) : `${Math.round(percent)}%`;
+      });
+    });
+  </script>
+</body>
+</html>
+
+
